@@ -1,6 +1,7 @@
 package com.example.personalfinancerackerapp.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -9,13 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.personalfinancerackerapp.data.Transaction
 
 @Composable
 fun AddTransactionDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Transaction) -> Unit
+    onConfirm: (amount: Double, category: String, type: String) -> Unit
 ) {
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -25,18 +26,17 @@ fun AddTransactionDialog(
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .padding(15.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Add Transaction", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 OutlinedTextField(
                     value = amount,
@@ -56,22 +56,23 @@ fun AddTransactionDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Radio buttons for Type
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()) {
                     types.forEach { selectedType ->
                         Row(
                             Modifier
                                 .selectable(
                                     selected = (type == selectedType),
                                     onClick = { type = selectedType }
-                                )
-                                .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ) {
                             RadioButton(
                                 selected = (type == selectedType),
                                 onClick = { type = selectedType }
                             )
-                            Text(text = selectedType)
+                            Text(text = selectedType, fontSize = 14.sp)
                         }
                     }
                 }
@@ -83,22 +84,20 @@ fun AddTransactionDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text("Cancel", fontSize = 16.sp)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
                         val amountValue = amount.toDoubleOrNull()
                         if (amountValue != null && category.isNotBlank()) {
                             onConfirm(
-                                Transaction(
-                                    amount = amountValue,
-                                    category = category,
-                                    type = type
-                                )
+                                amountValue,
+                                category,
+                                type
                             )
                         }
                     }) {
-                        Text("Add")
+                        Text("Add",fontSize = 16.sp)
                     }
                 }
             }

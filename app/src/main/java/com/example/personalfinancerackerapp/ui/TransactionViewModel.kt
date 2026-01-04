@@ -11,16 +11,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class TransactionViewModel(private val transactionDao: TransactionDao) : ViewModel() {
+class TransactionViewModel(private val transactionDao: TransactionDao, private val userId: Int) : ViewModel() {
 
-    val allTransactions: StateFlow<List<Transaction>> = transactionDao.getAllTransactions()
+    val allTransactions: StateFlow<List<Transaction>> = transactionDao.getAllTransactions(userId)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val income: StateFlow<Double> = transactionDao.getTotalAmountByType("INCOME")
+    val income: StateFlow<Double> = transactionDao.getTotalAmountByType(userId, "INCOME")
         .map { it ?: 0.0 }
         .stateIn(
             scope = viewModelScope,
@@ -28,7 +28,7 @@ class TransactionViewModel(private val transactionDao: TransactionDao) : ViewMod
             initialValue = 0.0
         )
 
-    val expense: StateFlow<Double> = transactionDao.getTotalAmountByType("EXPENSE")
+    val expense: StateFlow<Double> = transactionDao.getTotalAmountByType(userId, "EXPENSE")
         .map { it ?: 0.0 }
         .stateIn(
             scope = viewModelScope,
@@ -49,11 +49,11 @@ class TransactionViewModel(private val transactionDao: TransactionDao) : ViewMod
     }
 }
 
-class TransactionViewModelFactory(private val transactionDao: TransactionDao) : ViewModelProvider.Factory {
+class TransactionViewModelFactory(private val transactionDao: TransactionDao, private val userId: Int) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TransactionViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TransactionViewModel(transactionDao) as T
+            return TransactionViewModel(transactionDao, userId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
